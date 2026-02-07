@@ -1,25 +1,33 @@
 """Tests for the summarizer module."""
 
+from unittest.mock import MagicMock, patch
+
+from daily_audio_summary.news import Article
 from daily_audio_summary.summarizer import summarize
 
 
-def test_summarize_empty_string():
-    assert summarize("") == ""
+def test_summarize_no_articles():
+    result = summarize([], {})
+    assert "Good morning" in result
+    assert "no local news" in result
 
 
-def test_summarize_single_sentence():
-    result = summarize("Hello world.")
-    assert result == "Hello world."
+@patch("daily_audio_summary.summarizer.anthropic")
+def test_summarize_calls_claude(mock_anthropic):
+    mock_client = MagicMock()
+    mock_anthropic.Anthropic.return_value = mock_client
+    mock_response = MagicMock()
+    mock_response.content = [MagicMock(text="Good morning Binghamton!")]
+    mock_client.messages.create.return_value = mock_response
 
+    articles = [
+        Article(title="Test headline", summary="Test summary", source="test"),
+    ]
+    config = {"anthropic_api_key": "test-key", "location": "Binghamton, NY"}
+    result = summarize(articles, config)
 
-def test_summarize_respects_max_sentences():
-    content = "First. Second. Third. Fourth. Fifth. Sixth. Seventh."
-    result = summarize(content, max_sentences=3)
-    assert result == "First. Second. Third."
-
-
-def test_summarize_default_max():
-    content = "One. Two. Three. Four. Five. Six. Seven."
-    result = summarize(content)
-    sentences = [s.strip() for s in result.rstrip(".").split(".") if s.strip()]
-    assert len(sentences) <= 5
+    assert result == "Good morning Binghamton!"
+    mock_client.messages.create.assert_called_once()
+    call_kwargs = mock_client.messages.create.call_args.kwargs
+    assert call_kwargs["system"]
+    assert "Test headline" in call_kwargs["messages"][0]["content"]

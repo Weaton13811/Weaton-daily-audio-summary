@@ -4,11 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "daily-audio-summary"
-version = "0.1.0"
-description = "Generate daily audio summaries from text content"
+version = "0.2.0"
+description = "Daily AI-powered audio news briefing for Binghamton NY, delivered via iMessage"
 requires-python = ">=3.10"
 dependencies = [
-    "gtts>=2.3.0",
+    "anthropic>=0.39.0",
+    "requests>=2.31.0",
 ]
 
 [project.optional-dependencies]

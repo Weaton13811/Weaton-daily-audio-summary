@@ -1,3 +1,3 @@
-"""Daily Audio Summary - Generate daily audio summaries from text content."""
+"""Daily Audio Summary - AI-powered morning news briefings for Binghamton NY."""
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

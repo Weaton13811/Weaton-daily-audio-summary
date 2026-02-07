@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.dailyaudiosummary</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <!-- Update this path to your Python interpreter -->
+        <string>/usr/bin/python3</string>
+        <string>-m</string>
+        <string>daily_audio_summary</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <!-- Update this to your project directory -->
+    <string>/Users/YOU/Weaton-daily-audio-summary</string>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>6</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/daily-audio-summary.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/daily-audio-summary.err</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin</string>
+        <!-- Set your Anthropic API key here or in config.json -->
+        <key>ANTHROPIC_API_KEY</key>
+        <string>YOUR_KEY_HERE</string>
+        <!-- Your phone number for iMessage delivery -->
+        <key>DAS_IMESSAGE_TO</key>
+        <string>+1XXXXXXXXXX</string>
+    </dict>
+</dict>
+</plist>
