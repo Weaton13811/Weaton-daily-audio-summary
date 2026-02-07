@@ -9,6 +9,11 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 
+def _escape_applescript(s: str) -> str:
+    """Escape a string for safe interpolation into AppleScript."""
+    return s.replace("\\", "\\\\").replace('"', '\\"')
+
+
 def send_imessage(file_path: str | Path, recipient: str, text: str = "") -> None:
     """Send a file (and optional text) via iMessage using AppleScript.
 
@@ -27,28 +32,36 @@ def send_imessage(file_path: str | Path, recipient: str, text: str = "") -> None
             "Set 'imessage_to' in config or DAS_IMESSAGE_TO env var."
         )
 
-    # AppleScript to send a file via Messages.app
-    script = f"""\
-tell application "Messages"
-    set targetService to 1st account whose service type = iMessage
-    set targetBuddy to participant "{recipient}" of targetService
-    send POSIX file "{file_path}" to targetBuddy
-end tell
-"""
+    safe_recipient = _escape_applescript(recipient)
+    safe_path = _escape_applescript(str(file_path))
 
     if text:
-        script = f"""\
-tell application "Messages"
-    set targetService to 1st account whose service type = iMessage
-    set targetBuddy to participant "{recipient}" of targetService
-    send "{text}" to targetBuddy
-    send POSIX file "{file_path}" to targetBuddy
-end tell
-"""
+        safe_text = _escape_applescript(text)
+        script = (
+            'tell application "Messages"\n'
+            "    set targetService to 1st account"
+            " whose service type = iMessage\n"
+            f'    set targetBuddy to participant "{safe_recipient}"'
+            " of targetService\n"
+            f'    send "{safe_text}" to targetBuddy\n'
+            f'    send POSIX file "{safe_path}" to targetBuddy\n'
+            "end tell"
+        )
+    else:
+        script = (
+            'tell application "Messages"\n'
+            "    set targetService to 1st account"
+            " whose service type = iMessage\n"
+            f'    set targetBuddy to participant "{safe_recipient}"'
+            " of targetService\n"
+            f'    send POSIX file "{safe_path}" to targetBuddy\n'
+            "end tell"
+        )
 
     logger.info("Sending iMessage to %s with file %s", recipient, file_path)
     subprocess.run(
         ["osascript", "-e", script],
         check=True,
+        timeout=60,
     )
     logger.info("iMessage sent successfully")

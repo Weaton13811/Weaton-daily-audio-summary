@@ -37,3 +37,11 @@ htmlcov/
 output/
 *.mp3
 *.wav
+*.m4a
+*.aiff
+
+# Config (may contain API keys)
+config.json
+
+# Logs
+*.log

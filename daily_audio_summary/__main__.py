@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -16,18 +17,7 @@ from daily_audio_summary.summarizer import summarize
 logger = logging.getLogger(__name__)
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Generate a daily audio news briefing")
-    parser.add_argument("--config", help="Path to config.json")
-    parser.add_argument("--no-send", action="store_true", help="Skip iMessage delivery")
-    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose logging")
-    args = parser.parse_args()
-
-    logging.basicConfig(
-        level=logging.DEBUG if args.verbose else logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    )
-
+def run(args: argparse.Namespace) -> None:
     config = load_config(args.config)
 
     # 1. Gather local news
@@ -58,9 +48,36 @@ def main() -> None:
         )
         logger.info("Delivered!")
     elif not config.get("imessage_to"):
-        logger.warning("No iMessage recipient configured — skipping delivery")
+        logger.warning(
+            "No iMessage recipient configured — skipping delivery"
+        )
 
     print(f"Done! Audio briefing: {audio_file}")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Generate a daily audio news briefing",
+    )
+    parser.add_argument("--config", help="Path to config.json")
+    parser.add_argument(
+        "--no-send", action="store_true", help="Skip iMessage delivery",
+    )
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Verbose logging",
+    )
+    args = parser.parse_args()
+
+    logging.basicConfig(
+        level=logging.DEBUG if args.verbose else logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    )
+
+    try:
+        run(args)
+    except Exception:
+        logger.exception("Daily briefing failed")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

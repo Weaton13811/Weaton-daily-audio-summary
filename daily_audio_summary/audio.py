@@ -24,6 +24,7 @@ def text_to_audio(text: str, output_path: str, voice: str = "Evan (Premium)") ->
     subprocess.run(
         ["say", "-v", voice, "-o", str(aiff_path), text],
         check=True,
+        timeout=300,
     )
 
     # Convert AIFF -> AAC (.m4a) using afconvert (ships with macOS)
@@ -38,6 +39,7 @@ def text_to_audio(text: str, output_path: str, voice: str = "Evan (Premium)") ->
             str(m4a_path),
         ],
         check=True,
+        timeout=120,
     )
 
     # Clean up intermediate AIFF
